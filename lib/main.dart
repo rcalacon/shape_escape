@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         MaterialPageRoute(builder: (context) => AppearWidget())
                       );
                     },
-                    icon: Icon(Icons.brightness_1),
+                    icon: Icon(Icons.crop_square_sharp),
                     label: Text(
                       "APPEAR",
                     ),
