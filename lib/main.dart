@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'AppearWidget.dart';
 
 void main() {
   runApp(MyApp());
@@ -58,7 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: this._buttonWidth,
                 child: ElevatedButton.icon(
                     onPressed: () {
-                      /*...*/
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AppearWidget())
+                      );
                     },
                     icon: Icon(Icons.brightness_1),
                     label: Text(
