@@ -11,16 +11,18 @@ class AppearWidget extends StatefulWidget {
 }
 
 class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMixin {
-  Rect rect;
-  Animation<double> animation;
-  AnimationController controller;
+  Rect _rect;
+  Animation<double> _animation;
+  AnimationController _controller;
   final double _appBarOffSet = 50;
   final double _utilityBarOffset = 20;
+  final double _bottomBarOffset = 45;
   final double _buttonWidth = 200;
   bool _changeLevel;
   int _currentLevel;
   Stopwatch _gameTimer;
   Icon _currentLevelWidget;
+  final String _fontFamily = "Satisfy";
 
   @override
   void initState() {
@@ -40,7 +42,8 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
     double left = right - boxSize;
 
     double bottom = rectPositionDecider.nextInt(height.toInt()).toDouble();
-    if(bottom < boxSize) bottom = bottom + boxSize;
+    if(bottom < (boxSize + _appBarOffSet + _utilityBarOffset + _bottomBarOffset)) bottom = bottom + boxSize;
+    else if(bottom > (height - _bottomBarOffset)) bottom = bottom - _bottomBarOffset;
     double top = bottom - boxSize;
 
     return Rect.fromLTRB(left,top,right,bottom);
@@ -51,7 +54,7 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
   }
 
   int startNextLevel(int currentLevel){
-    if(controller != null) controller.dispose();
+    if(_controller != null) _controller.dispose();
 
     double startOpacity = 0;
     double endOpacity;
@@ -83,34 +86,34 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
       _currentLevelWidget = Icon(Icons.looks_5);
     }
 
-    controller = AnimationController(
+    _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: animationDuration),
-      // duration: Duration(seconds: 5),
     );
 
     Tween<double> _opacityTween = Tween(begin: startOpacity, end: endOpacity);
-    // Tween<double> _rotationTween = Tween(begin: 0, end: .5);
 
-    animation = _opacityTween.animate(controller)
+    _animation = _opacityTween.animate(_controller)
       ..addListener(() {
         setState(() {});
       })
       ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {}
+        if (status == AnimationStatus.completed) {
+          _controller.forward();
+        }
         else if (status == AnimationStatus.dismissed) {
-          controller.forward();
+          _controller.forward();
         }
       });
 
-    controller.forward();
+    _controller.forward();
 
     return boxSize;
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    if(_controller != null) _controller.dispose();
     super.dispose();
   }
 
@@ -119,11 +122,19 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
 
     if(this._currentLevel > 5){
       _gameTimer.stop();
-      controller.dispose();
+      _controller.dispose();
+      _controller = null;
 
       return Scaffold(
         appBar: AppBar(
-          title: Text('Appear'),
+          title: Text(
+              'Appear',
+              style: TextStyle(
+                  fontSize: 30,
+                  color: Colors.white,
+                  fontFamily: _fontFamily
+              )
+          ),
           toolbarHeight: this._appBarOffSet,
         ),
         body: Container(
@@ -137,7 +148,7 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
                     style: TextStyle(
                         fontSize: 35,
                         color: Colors.white,
-                        fontFamily: 'Satisfy'
+                        fontFamily: _fontFamily
                     )
                 ),
                 Text(
@@ -145,7 +156,7 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
                     style: TextStyle(
                         fontSize: 25,
                         color: Colors.white,
-                        fontFamily: 'Satisfy'
+                        fontFamily: _fontFamily
                     )
                 ),
                 Container(
@@ -155,14 +166,20 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
                   width: this._buttonWidth,
                   child: ElevatedButton.icon(
                       onPressed: () {
-                        /*...*/
+                        this._changeLevel = true;
+                        this._controller = null;
+                        this._gameTimer.reset();
+                        this._gameTimer.start();
+                        setState((){
+                          _currentLevel = 1;
+                        });
                       },
                       icon: Icon(Icons.emoji_emotions_outlined),
                       label: Text(
                         "PLAY AGAIN",
                       ),
                       style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(Color(0xffd5d6ea))
+                          backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
                       )
                   ),
                 ),
@@ -170,14 +187,14 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
                   width: this._buttonWidth,
                   child: ElevatedButton.icon(
                       onPressed: () {
-                        /*...*/
+                        Navigator.pop(context);
                       },
                       icon: Icon(Icons.arrow_back),
                       label: Text(
                         "RETURN",
                       ),
                       style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(Color(0xffd5d6ea))
+                          backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
                       )
                   ),
                 ),
@@ -190,24 +207,36 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
     else {
       if(this._changeLevel == true){
         int rectSize = startNextLevel(this._currentLevel);
-        rect = createRandomPositionRect(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height, rectSize);
+        _rect = createRandomPositionRect(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height, rectSize);
         this._changeLevel = false;
       }
 
       return Scaffold(
         appBar: AppBar(
-          // leading: Text(
-          //     "Level ${this._currentLevel.toString()}"
-          // ),
           leading: _currentLevelWidget,
-          title: Text('Appear'),
+          title: Text(
+            'Appear',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: _fontFamily,
+                  fontSize: 30
+              )
+          ),
           actions: <Widget>[
             Text(
-                "Timer (ms) |"
+                " ${(_gameTimer.elapsed.inMilliseconds / 1000).toStringAsFixed(1)}",
+                style: TextStyle(
+                    fontSize: 25,
+                    fontFamily: _fontFamily
+                )
             ),
             Text(
-                " ${_gameTimer.elapsed.inMilliseconds.toString()}"
-            )
+                " Seconds",
+                style: TextStyle(
+                    fontSize: 25,
+                    fontFamily: _fontFamily
+                )
+            ),
           ],
           toolbarHeight: this._appBarOffSet,
         ),
@@ -223,7 +252,7 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
 
                             Offset normalizedOffset = offset - Offset(0, this._appBarOffSet + this._utilityBarOffset);
 
-                            final bool clickedOn = rect.contains(normalizedOffset);
+                            final bool clickedOn = _rect.contains(normalizedOffset);
                             if (clickedOn) {
                               this._changeLevel = true;
                               setState((){
@@ -234,10 +263,10 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
                             }
                           },
                           child: AnimatedBuilder(
-                              animation: animation,
+                              animation: _animation,
                               builder: (context, snapshot) {
                                 return CustomPaint(
-                                    painter: AppearPainter(rect, animation.value),
+                                    painter: ReactPainter(_rect, _animation.value),
                                     child: Container()
                                 );
                               }

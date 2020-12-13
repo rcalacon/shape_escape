@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'AppearWidget.dart';
+import 'ReactWidget.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,12 +11,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Shape Escape',
       theme: ThemeData(
         primarySwatch: Colors.indigo,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Escape the shapes!'),
+      home: MyHomePage(title: 'Escape The Shapes!'),
     );
   }
 }
@@ -32,12 +33,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   double _buttonWidth = 120;
   double _highScoreButtonWidth = 200;
+  final String _fontFamily = "Satisfy";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(
+            widget.title,
+            style: TextStyle(
+                fontFamily: _fontFamily
+            )
+        ),
       ),
       body: Container(
         color: Colors.black87,
@@ -50,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   style: TextStyle(
                     fontSize: 35,
                     color: Colors.white,
-                    fontFamily: 'Satisfy'
+                    fontFamily: _fontFamily
                   )
               ),
               Container(
@@ -78,7 +85,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: this._buttonWidth,
                 child: ElevatedButton.icon(
                     onPressed: () {
-                      /*...*/
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ReactWidget())
+                      );
                     },
                     icon: Icon(Icons.access_alarm),
                     label: Text(
@@ -130,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       "MATCH",
                     ),
                     style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Color(0xffffdfd3))
+                        backgroundColor: MaterialStateProperty.all<Color>(Color(0xffffccb6))
                     )
                 ),
               ),
@@ -148,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       "HIGH SCORES",
                     ),
                     style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Color(0xffd5d6ea))
+                        backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
                     )
                 ),
               ),
