@@ -31,7 +31,9 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
   Stopwatch _gameTimer;
   int _currentLevel;
   int _currentShapeCombo;
-  bool _gameOver;
+  int _currentColorCombo;
+  int _currentSizeCombo;
+  int _correctSize;
   final String _fontFamily = "Satisfy";
 
   @override
@@ -59,9 +61,6 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
         if (status == AnimationStatus.completed) {
           _controller.stop();
           _changeLevel = false;
-          setState(() {
-            _gameOver = true;
-          });
         }
         else if (status == AnimationStatus.dismissed) {
           _controller.forward();
@@ -110,7 +109,6 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
   }
 
   _UniqueWidgetState() {
-    _gameOver = false;
     _currentLevel = 1;
   }
 
@@ -151,6 +149,20 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
     _labelPositions.add([shapeFiveX, shapeFiveY + labelOffset]);
   }
 
+  updateLevelIcon(){
+    if(_currentLevel == 2){
+      _currentLevelWidget = Icon(Icons.looks_two);
+    }else if(_currentLevel == 3){
+      _currentLevelWidget = Icon(Icons.looks_3);
+    }else if(_currentLevel == 4){
+      _currentLevelWidget = Icon(Icons.looks_4);
+    }else if(_currentLevel == 5){
+      _currentLevelWidget = Icon(Icons.looks_5);
+    }else if(_currentLevel == 6){
+      _currentLevelWidget = Icon(Icons.looks_6);
+    }
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -164,44 +176,132 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
       _initializedShapePositions = true;
     }
 
-    if(_changeLevel){
-      _shapeColorOne = getShapeColor();
-      _shapeColorTwo = getDifferentShapeColor(_shapeColorOne);
-      _currentShapeCombo = new Random().nextInt(2);
-      determineCorrectAnswer();
-      _changeLevel = false;
-    }
+    if(this._currentLevel > 6){
+      _gameTimer.stop();
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: _currentLevelWidget,
-        title: Text(
-            'Unique',
-            style: TextStyle(
-              fontFamily: _fontFamily,
-              fontSize: 30,
-            )
+      return Scaffold(
+          appBar: AppBar(
+            title: Text(
+                'Unique',
+                style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.white,
+                    fontFamily: _fontFamily
+                )
+            ),
+            toolbarHeight: this._appBarOffSet,
+          ),
+          body: Container(
+            color: Colors.black87,
+            child: Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                          '!! Results !!',
+                          style: TextStyle(
+                              fontSize: 35,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
+                      ),
+                      Text(
+                          'Time Elapsed: ${_gameTimer.elapsed.inMilliseconds / 1000}s',
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
+                      ),
+                      Container(
+                          height: 30
+                      ),
+                      Container(
+                        width: this._buttonWidth,
+                        child: ElevatedButton.icon(
+                            onPressed: () {
+                              this._changeLevel = true;
+                              this._gameTimer.reset();
+                              this._gameTimer.start();
+                              this._controller.reset();
+                              this._controller.forward();
+                              setState((){
+                                _currentLevel = 1;
+                              });
+                            },
+                            icon: Icon(Icons.emoji_emotions_outlined),
+                            label: Text(
+                              "PLAY AGAIN",
+                            ),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                            )
+                        ),
+                      ),
+                      Container(
+                        width: this._buttonWidth,
+                        child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            icon: Icon(Icons.arrow_back),
+                            label: Text(
+                              "RETURN",
+                            ),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                            )
+                        ),
+                      ),
+                    ]
+                )
+            ),
+          )
+      );
+    }
+    else{
+      if(_changeLevel){
+        updateLevelIcon();
+        _shapeColorOne = getShapeColor();
+        _shapeColorTwo = getDifferentShapeColor(_shapeColorOne);
+        _currentShapeCombo = new Random().nextInt(2);
+        _currentColorCombo = new Random().nextInt(2);
+        _currentSizeCombo = new Random().nextInt(2);
+        _correctSize = new Random().nextInt(3);
+        determineCorrectAnswer();
+        _changeLevel = false;
+      }
+
+      return Scaffold(
+        appBar: AppBar(
+          leading: _currentLevelWidget,
+          title: Text(
+              'Unique',
+              style: TextStyle(
+                fontFamily: _fontFamily,
+                fontSize: 30,
+              )
+          ),
+          actions: <Widget>[
+            Text(
+                " ${(_gameTimer.elapsed.inMilliseconds / 1000).toStringAsFixed(1)}",
+                style: TextStyle(
+                    fontSize: 25,
+                    fontFamily: _fontFamily
+                )
+            ),
+            Text(
+                " Seconds",
+                style: TextStyle(
+                    fontSize: 25,
+                    fontFamily: _fontFamily
+                )
+            ),
+          ],
+          toolbarHeight: this._appBarOffSet,
         ),
-        actions: <Widget>[
-          Text(
-              " ${(_gameTimer.elapsed.inMilliseconds / 1000).toStringAsFixed(1)}",
-              style: TextStyle(
-                  fontSize: 25,
-                  fontFamily: _fontFamily
-              )
-          ),
-          Text(
-              " Seconds",
-              style: TextStyle(
-                  fontSize: 25,
-                  fontFamily: _fontFamily
-              )
-          ),
-        ],
-        toolbarHeight: this._appBarOffSet,
-      ),
-      body: SafeArea(
-          child: Column(
+        body: SafeArea(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
@@ -216,93 +316,126 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                 ),
                 Expanded(
                     child: CustomPaint(
-                            painter: UniquePainter(_shapePositions, _labelPositions, _currentLevel, _correctAnswer, _currentShapeCombo, _shapeColorOne, _shapeColorTwo),
-                            child: Container()
-                        )
+                        painter: UniquePainter(_shapePositions, _labelPositions, _currentLevel, _correctAnswer, _currentShapeCombo, _shapeColorOne, _shapeColorTwo, _currentColorCombo, _currentSizeCombo, _correctSize),
+                        child: Container()
+                    )
+                ),
+                Text(
+                    "Select your answer Below!",
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontFamily: _fontFamily
+                    )
                 ),
                 ButtonBar(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    ElevatedButton(
-                        onPressed: () {
-
-                        },
-                        child: Text(
-                          "1",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontFamily: _fontFamily
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      ElevatedButton(
+                          onPressed: () {
+                            if(_correctAnswer == 1){
+                              setState((){
+                                _currentLevel = _currentLevel + 1;
+                              });
+                              _changeLevel = true;
+                            }
+                          },
+                          child: Text(
+                              "1",
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  fontFamily: _fontFamily
+                              )
+                          ),
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
                           )
-                        ),
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                        )
-                    ),
-                    ElevatedButton(
-                        onPressed: () {
-
-                        },
-                        child: Text(
-                            "2",
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontFamily: _fontFamily
-                            )
-                        ),
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                        )
-                    ),
-                    ElevatedButton(
-                        onPressed: () {
-
-                        },
-                        child: Text(
-                            "3",
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontFamily: _fontFamily
-                            )
-                        ),
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                        )
-                    ),
-                    ElevatedButton(
-                        onPressed: () {
-
-                        },
-                        child: Text(
-                            "4",
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontFamily: _fontFamily
-                            )
-                        ),
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                        )
-                    ),
-                    ElevatedButton(
-                        onPressed: () {
-
-                        },
-                        child: Text(
-                            "5",
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontFamily: _fontFamily
-                            )
-                        ),
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                        )
-                    ),
-                  ]
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            if(_correctAnswer == 2){
+                              setState((){
+                                _currentLevel = _currentLevel + 1;
+                              });
+                              _changeLevel = true;
+                            }
+                          },
+                          child: Text(
+                              "2",
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  fontFamily: _fontFamily
+                              )
+                          ),
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                          )
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            if(_correctAnswer == 3){
+                              setState((){
+                                _currentLevel = _currentLevel + 1;
+                              });
+                              _changeLevel = true;
+                            }
+                          },
+                          child: Text(
+                              "3",
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  fontFamily: _fontFamily
+                              )
+                          ),
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                          )
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            if(_correctAnswer == 4){
+                              setState((){
+                                _currentLevel = _currentLevel + 1;
+                              });
+                              _changeLevel = true;
+                            }
+                          },
+                          child: Text(
+                              "4",
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  fontFamily: _fontFamily
+                              )
+                          ),
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                          )
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            if(_correctAnswer == 5){
+                              setState((){
+                                _currentLevel = _currentLevel + 1;
+                              });
+                              _changeLevel = true;
+                            }
+                          },
+                          child: Text(
+                              "5",
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  fontFamily: _fontFamily
+                              )
+                          ),
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                          )
+                      ),
+                    ]
                 )
               ],
-          )
-      ),
-    );
+            )
+        ),
+      );
+    }
   }
 }
