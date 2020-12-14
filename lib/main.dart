@@ -4,7 +4,6 @@ import 'AppearWidget.dart';
 import 'ReactWidget.dart';
 import 'CountWidget.dart' as ShapeEscape;
 import 'UniqueWidget.dart' as ShapeEscape;
-import 'StoreClient.dart';
 import 'HighScoresWidget.dart';
 
 void main() {

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:math';
 import 'dart:async';
 import 'ReactPainter.dart';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ReactWidget extends StatefulWidget {
   ReactWidget({Key key, this.title}) : super(key: key);
@@ -12,6 +16,9 @@ class ReactWidget extends StatefulWidget {
 }
 
 class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin {
+  Future<FirebaseApp> _initialization;
+  final String highScoreCollection = "react";
+
   Rect _rect;
   int _rectColor;
   int _prevRectColor;
@@ -28,6 +35,10 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
   bool _gameOver;
   final String _fontFamily = "Satisfy";
   int _score;
+  bool canSubmitInitials;
+  bool submittedInitials;
+
+  final _initialsSubmissionController = TextEditingController();
 
   //Canvas details fetched while debugging. Can probably improve this.
   final double canvasWidth = 411;
@@ -36,6 +47,11 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
+
+    //Since the game has to be played, this should be initialized by then
+    if(_initialization == null){
+      _initialization = Firebase.initializeApp();
+    }
 
     _updateRect = true;
 
@@ -55,6 +71,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
           _controller.stop();
           _updateRect = false;
           setState(() {
+            canSubmitInitials = false;
             _gameOver = true;
           });
         }
@@ -67,6 +84,8 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
 
     _gameTimer = new Stopwatch();
     _gameTimer.start();
+
+    _initialsSubmissionController.text = "";
   }
 
   Rect createRandomPositionRect(int boxSize){
@@ -100,6 +119,8 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
   _ReactWidgetState() {
     _score = 0;
     _gameOver = false;
+    canSubmitInitials = false;
+    submittedInitials = false;
   }
 
   int updateDifficulty(int score){
@@ -175,14 +196,16 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                         width: this._buttonWidth,
                         child: ElevatedButton.icon(
                             onPressed: () {
-                              setState((){
-                                _score = 0;
-                                _gameOver = false;
-                              });
                               this._controller.reset();
                               this._controller.forward();
                               this._gameTimer.reset();
                               this._gameTimer.start();
+                              this._initialsSubmissionController.text = "";
+                              setState((){
+                                _score = 0;
+                                submittedInitials = false;
+                                _gameOver = false;
+                              });
                             },
                             icon: Icon(Icons.emoji_emotions_outlined),
                             label: Text(
@@ -208,6 +231,91 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                             )
                         ),
                       ),
+                      this.submittedInitials ?
+                      Text(
+                          "submitted!",
+                          style: TextStyle(
+                              fontSize: 35,
+                              fontFamily: _fontFamily,
+                              color: Colors.white
+                          )
+                      ) :
+                      Container(
+                        width: this._buttonWidth,
+                        child: ElevatedButton.icon(
+                            onPressed: !this.canSubmitInitials ? null : () {
+                              CollectionReference reactCollection = FirebaseFirestore.instance.collection(highScoreCollection);
+                              reactCollection.add({
+                                'initials': _initialsSubmissionController.text,
+                                'score': _score
+                              })
+                                  .then((value) => setState((){submittedInitials = true;}))
+                                  .catchError((error) => print("Failed to add document: $error"));
+                            },
+                            icon: Icon(Icons.list),
+                            label: Text(
+                              "SUBMIT SCORE",
+                            ),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                            )
+                        ),
+                      ),
+                      Container(
+                          height: 10
+                      ),
+                      this.submittedInitials ?
+                      Container() :
+                      Container(
+                          height: 50,
+                          width: this._buttonWidth,
+                          child: Theme(
+                              data: new ThemeData(
+                                primaryColor: Colors.white,
+                                primaryColorDark: Colors.white,
+                              ),
+                              child: TextField(
+                                  controller: _initialsSubmissionController,
+                                  textAlign: TextAlign.center,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(RegExp("[a-zA-Z]"))
+                                  ],
+                                  maxLength: 3,
+                                  decoration: InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white
+                                        )
+                                    ),
+                                    border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white
+                                        )
+                                    ),
+                                    labelText: 'enter initials',
+                                    counterText: "",
+                                    labelStyle: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  style: TextStyle(
+                                      fontSize: 35,
+                                      color: Colors.white,
+                                      decorationColor: Colors.white,
+                                      fontFamily: _fontFamily
+                                  ),
+                                  onChanged: (text) {
+                                    if(text.length > 0)
+                                      setState(() {
+                                        canSubmitInitials = true;
+                                      });
+                                    else setState(() {
+                                      canSubmitInitials = false;
+                                    });
+                                  }
+                              )
+                          )
+                      )
                     ]
                 )
             ),

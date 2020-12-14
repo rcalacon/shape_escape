@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:core';
 import 'dart:math';
 import 'CountPainter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CountWidget extends StatefulWidget {
   CountWidget({Key key, this.title}) : super(key: key);
@@ -13,6 +17,9 @@ class CountWidget extends StatefulWidget {
 }
 
 class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin {
+  Future<FirebaseApp> _initialization;
+  final String highScoreCollection = "count";
+
   List _shapePositions;
   List _colorPositions;
   List _shapeTypes;
@@ -43,9 +50,19 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
 
   FToast answerResultToast;
 
+  bool canSubmitInitials;
+  bool submittedInitials;
+
+  final _initialsSubmissionController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+
+    //Since the game has to be played, this should be initialized by then
+    if(_initialization == null){
+      _initialization = Firebase.initializeApp();
+    }
 
     _shapePositions = new List();
     _colorPositions = new List();
@@ -82,6 +99,8 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
 
     answerResultToast = FToast();
     answerResultToast.init(context);
+
+    _initialsSubmissionController.text = "";
   }
 
   void randomizeShapeColors(){
@@ -109,6 +128,8 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
 
   _CountWidgetState() {
     _currentLevel = 1;
+    canSubmitInitials = false;
+    submittedInitials = false;
   }
 
   List getRandomPosition(){
@@ -349,7 +370,10 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                               this._gameTimer.start();
                               this._controller.reset();
                               this._controller.forward();
+                              _initialsSubmissionController.text = "";
                               setState((){
+                                canSubmitInitials = false;
+                                submittedInitials = false;
                                 _currentLevel = 1;
                               });
                             },
@@ -377,6 +401,91 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                             )
                         ),
                       ),
+                      this.submittedInitials ?
+                      Text(
+                          "submitted!",
+                          style: TextStyle(
+                              fontSize: 35,
+                              fontFamily: _fontFamily,
+                              color: Colors.white
+                          )
+                      ) :
+                      Container(
+                        width: this._buttonWidth,
+                        child: ElevatedButton.icon(
+                            onPressed: !this.canSubmitInitials ? null : () {
+                              CollectionReference countCollection = FirebaseFirestore.instance.collection(highScoreCollection);
+                              countCollection.add({
+                                'initials': _initialsSubmissionController.text,
+                                'score': _gameTimer.elapsed.inMilliseconds
+                              })
+                                  .then((value) => setState((){submittedInitials = true;}))
+                                  .catchError((error) => print("Failed to add document: $error"));
+                            },
+                            icon: Icon(Icons.list),
+                            label: Text(
+                              "SUBMIT SCORE",
+                            ),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                            )
+                        ),
+                      ),
+                      Container(
+                          height: 10
+                      ),
+                      this.submittedInitials ?
+                      Container() :
+                      Container(
+                          height: 50,
+                          width: this._buttonWidth,
+                          child: Theme(
+                              data: new ThemeData(
+                                primaryColor: Colors.white,
+                                primaryColorDark: Colors.white,
+                              ),
+                              child: TextField(
+                                  controller: _initialsSubmissionController,
+                                  textAlign: TextAlign.center,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(RegExp("[a-zA-Z]"))
+                                  ],
+                                  maxLength: 3,
+                                  decoration: InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white
+                                        )
+                                    ),
+                                    border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white
+                                        )
+                                    ),
+                                    labelText: 'enter initials',
+                                    counterText: "",
+                                    labelStyle: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  style: TextStyle(
+                                      fontSize: 35,
+                                      color: Colors.white,
+                                      decorationColor: Colors.white,
+                                      fontFamily: _fontFamily
+                                  ),
+                                  onChanged: (text) {
+                                    if(text.length > 0)
+                                      setState(() {
+                                        canSubmitInitials = true;
+                                      });
+                                    else setState(() {
+                                      canSubmitInitials = false;
+                                    });
+                                  }
+                              )
+                          )
+                      )
                     ]
                 )
             ),
