@@ -164,10 +164,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: this._highScoreButtonWidth,
                 child: ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => HighScoresWidget())
-                      );
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(builder: (context) => HighScoresWidget())
+                      // );
                     },
                     icon: Icon(Icons.list),
                     label: Text(

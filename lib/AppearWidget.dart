@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'dart:math';
 import 'AppearPainter.dart';
 
+import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -31,6 +33,7 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
   Stopwatch _gameTimer;
   Icon _currentLevelWidget;
   final String _fontFamily = "Satisfy";
+  FToast answerResultToast;
 
   //Canvas details fetched while debugging. Can probably improve this.
   final double canvasWidth = 411;
@@ -55,6 +58,9 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
     _gameTimer = new Stopwatch();
     _gameTimer.start();
 
+    answerResultToast = FToast();
+    answerResultToast.init(context);
+
     _initialsSubmissionController.text = "";
   }
 
@@ -76,6 +82,40 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
     _currentLevel = 1;
     canSubmitInitials = false;
     submittedInitials = false;
+  }
+
+  void showAnswerResult(toastText){
+    answerResultToast.removeCustomToast();
+    answerResultToast.showToast(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15.0),
+            color: Colors.black87,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                  toastText,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontFamily: _fontFamily
+                  )
+              ),
+            ],
+          ),
+        ),
+        toastDuration: Duration(seconds: 1),
+        positionedToastBuilder: (context, child) {
+          return Positioned(
+              child: child,
+              bottom: 15,
+              left: 160
+          );
+        }
+    );
   }
 
   int startNextLevel(int currentLevel){
@@ -390,12 +430,13 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
 
                             final bool clickedOn = _rect.contains(normalizedOffset);
                             if (clickedOn) {
+                              showAnswerResult("! Nice !");
                               this._changeLevel = true;
                               setState((){
                                 this._currentLevel = this._currentLevel + 1;
                               });
                             } else {
-                              print("Missed");
+                              showAnswerResult("Missed!");
                             }
                           },
                           child: AnimatedBuilder(

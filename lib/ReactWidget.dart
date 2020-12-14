@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:math';
 import 'dart:async';
 import 'ReactPainter.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,6 +35,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
   Stopwatch _gameTimer;
   bool _gameOver;
   final String _fontFamily = "Satisfy";
+  FToast answerResultToast;
   int _score;
   bool canSubmitInitials;
   bool submittedInitials;
@@ -85,6 +87,9 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
     _gameTimer = new Stopwatch();
     _gameTimer.start();
 
+    answerResultToast = FToast();
+    answerResultToast.init(context);
+
     _initialsSubmissionController.text = "";
   }
 
@@ -121,6 +126,40 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
     _gameOver = false;
     canSubmitInitials = false;
     submittedInitials = false;
+  }
+
+  void showAnswerResult(toastText){
+    answerResultToast.removeCustomToast();
+    answerResultToast.showToast(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15.0),
+            color: Colors.black87,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                  toastText,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontFamily: _fontFamily
+                  )
+              ),
+            ],
+          ),
+        ),
+        toastDuration: Duration(seconds: 1),
+        positionedToastBuilder: (context, child) {
+          return Positioned(
+              child: child,
+              bottom: 15,
+              left: 160
+          );
+        }
+    );
   }
 
   int updateDifficulty(int score){
@@ -395,12 +434,13 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
 
                             final bool clickedOn = _rect.contains(normalizedOffset);
                             if (clickedOn) {
+                              showAnswerResult("! Nice !");
                               setState((){
                                 this._score = this._score + 1;
                               });
                               _updateRect = true;
                             } else {
-                              print("Missed");
+                              showAnswerResult("Missed!");
                             }
                           },
                           child: CustomPaint(
