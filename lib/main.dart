@@ -4,6 +4,8 @@ import 'AppearWidget.dart';
 import 'ReactWidget.dart';
 import 'CountWidget.dart' as ShapeEscape;
 import 'UniqueWidget.dart' as ShapeEscape;
+import 'StoreClient.dart';
+import 'HighScoresWidget.dart';
 
 void main() {
   runApp(MyApp());
@@ -146,7 +148,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: this._buttonWidth,
                 child: ElevatedButton.icon(
                     onPressed: () {
-                      /*...*/
                     },
                     icon: Icon(Icons.cached),
                     label: Text(
@@ -164,7 +165,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: this._highScoreButtonWidth,
                 child: ElevatedButton.icon(
                     onPressed: () {
-                      /*...*/
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => HighScoresWidget())
+                      );
                     },
                     icon: Icon(Icons.list),
                     label: Text(

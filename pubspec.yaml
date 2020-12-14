@@ -22,6 +22,9 @@ environment:
 
 dependencies:
   fluttertoast: ^7.1.5
+  firebase_core: ^0.5.3
+  firebase_analytics: ^5.0.2
+  cloud_firestore: ^0.14.4
   flutter:
     sdk: flutter
 

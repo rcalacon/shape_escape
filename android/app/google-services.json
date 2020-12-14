@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "450069217779",
+    "project_id": "shapeescape-24d76",
+    "storage_bucket": "shapeescape-24d76.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450069217779:android:e226d4dd06543875d0d286",
+        "android_client_info": {
+          "package_name": "com.example.shape_escape"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "450069217779-b5kkknq57ernpn7dd6ejvsibdgjt3av8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj66uYK1N4FmBS2yrGXlzd15W81w8wcnM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "450069217779-b5kkknq57ernpn7dd6ejvsibdgjt3av8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
