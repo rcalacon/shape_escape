@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:core';
 import 'dart:math';
 import 'CountPainter.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CountWidget extends StatefulWidget {
   CountWidget({Key key, this.title}) : super(key: key);
@@ -40,6 +41,8 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
   String answerFourText;
   String answerFiveText;
 
+  FToast answerResultToast;
+
   @override
   void initState() {
     super.initState();
@@ -76,6 +79,9 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
 
     _gameTimer = new Stopwatch();
     _gameTimer.start();
+
+    answerResultToast = FToast();
+    answerResultToast.init(context);
   }
 
   void randomizeShapeColors(){
@@ -121,6 +127,40 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
     }
 
     return [xVal, yVal];
+  }
+
+  void showAnswerResult(toastText){
+    answerResultToast.removeCustomToast();
+    answerResultToast.showToast(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15.0),
+            color: Colors.black87,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                  toastText,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontFamily: _fontFamily
+                  )
+              ),
+            ],
+          ),
+        ),
+        toastDuration: Duration(seconds: 1),
+        positionedToastBuilder: (context, child) {
+          return Positioned(
+              child: child,
+              bottom: 95,
+              left: 160
+          );
+        }
+    );
   }
 
   void setShapePositions(int level){
@@ -452,6 +492,9 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                       _currentLevel = _currentLevel + 1;
                                     });
                                     _changeLevel = true;
+                                    showAnswerResult("Correct!");
+                                  }else {
+                                    showAnswerResult("Wrong!");
                                   }
                                 },
                                 child: Text(
@@ -472,6 +515,9 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                       _currentLevel = _currentLevel + 1;
                                     });
                                     _changeLevel = true;
+                                    showAnswerResult("Correct!");
+                                  }else {
+                                    showAnswerResult("Wrong!");
                                   }
                                 },
                                 child: Text(
@@ -492,6 +538,9 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                       _currentLevel = _currentLevel + 1;
                                     });
                                     _changeLevel = true;
+                                    showAnswerResult("Correct!");
+                                  }else {
+                                    showAnswerResult("Wrong!");
                                   }
                                 },
                                 child: Text(
@@ -512,6 +561,9 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                       _currentLevel = _currentLevel + 1;
                                     });
                                     _changeLevel = true;
+                                    showAnswerResult("Correct!");
+                                  }else {
+                                    showAnswerResult("Wrong!");
                                   }
                                 },
                                 child: Text(
@@ -532,6 +584,9 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                       _currentLevel = _currentLevel + 1;
                                     });
                                     _changeLevel = true;
+                                    showAnswerResult("Correct!");
+                                  }else {
+                                    showAnswerResult("Wrong!");
                                   }
                                 },
                                 child: Text(

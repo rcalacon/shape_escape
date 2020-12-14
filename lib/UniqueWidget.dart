@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
 import 'UniquePainter.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class UniqueWidget extends StatefulWidget {
   UniqueWidget({Key key, this.title}) : super(key: key);
@@ -35,6 +36,7 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
   int _currentSizeCombo;
   int _correctSize;
   final String _fontFamily = "Satisfy";
+  FToast answerResultToast;
 
   @override
   void initState() {
@@ -71,6 +73,9 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
 
     _gameTimer = new Stopwatch();
     _gameTimer.start();
+
+    answerResultToast = FToast();
+    answerResultToast.init(context);
   }
 
   void determineCorrectAnswer(){
@@ -146,6 +151,40 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
     }else if(_currentLevel == 6){
       _currentLevelWidget = Icon(Icons.looks_6);
     }
+  }
+
+  void showAnswerResult(toastText){
+      answerResultToast.removeCustomToast();
+      answerResultToast.showToast(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15.0),
+            color: Colors.black87,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                toastText,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontFamily: _fontFamily
+                )
+              ),
+            ],
+          ),
+          ),
+          toastDuration: Duration(seconds: 1),
+          positionedToastBuilder: (context, child) {
+          return Positioned(
+            child: child,
+            bottom: 95,
+            left: 160
+          );
+        }
+      );
   }
 
   @override
@@ -345,7 +384,9 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                         _currentLevel = _currentLevel + 1;
                                       });
                                       _changeLevel = true;
+                                      showAnswerResult("Correct!");
                                     }
+                                    else showAnswerResult("Wrong!");
                                   },
                                   child: Text(
                                       "1",
@@ -365,7 +406,9 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                         _currentLevel = _currentLevel + 1;
                                       });
                                       _changeLevel = true;
+                                      showAnswerResult("Correct!");
                                     }
+                                    else showAnswerResult("Wrong!");
                                   },
                                   child: Text(
                                       "2",
@@ -385,7 +428,9 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                         _currentLevel = _currentLevel + 1;
                                       });
                                       _changeLevel = true;
+                                      showAnswerResult("Correct!");
                                     }
+                                    else showAnswerResult("Wrong!");
                                   },
                                   child: Text(
                                       "3",
@@ -405,7 +450,9 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                         _currentLevel = _currentLevel + 1;
                                       });
                                       _changeLevel = true;
+                                      showAnswerResult("Correct!");
                                     }
+                                    else showAnswerResult("Wrong!");
                                   },
                                   child: Text(
                                       "4",
@@ -425,7 +472,9 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                         _currentLevel = _currentLevel + 1;
                                       });
                                       _changeLevel = true;
+                                      showAnswerResult("Correct!");
                                     }
+                                    else showAnswerResult("Wrong!");
                                   },
                                   child: Text(
                                       "5",
