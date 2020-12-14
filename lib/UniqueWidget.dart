@@ -78,21 +78,6 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
     _correctAnswer = correctAnswerDecider.nextInt(4) + 1;
   }
 
-  Rect createRandomPositionRect(double width, double height, int boxSize){
-    Random rectPositionDecider = new Random();
-
-    double right = rectPositionDecider.nextInt(width.toInt()).toDouble();
-    if(right < boxSize) right = right + boxSize;
-    double left = right - boxSize;
-
-    double bottom = rectPositionDecider.nextInt(height.toInt()).toDouble();
-    if(bottom < (boxSize + _appBarOffSet + _utilityBarOffset + _bottomBarOffset)) bottom = bottom + boxSize;
-    else if(bottom > (height - _bottomBarOffset)) bottom = bottom - _bottomBarOffset;
-    double top = bottom - boxSize;
-
-    return Rect.fromLTRB(left,top,right,bottom);
-  }
-
   int getShapeColor(){
     return new Random().nextInt(4);
   }
@@ -198,7 +183,7 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                          '!! Results !!',
+                          'Results',
                           style: TextStyle(
                               fontSize: 35,
                               color: Colors.white,
@@ -212,6 +197,11 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                               color: Colors.white,
                               fontFamily: _fontFamily
                           )
+                      ),
+                      Image(
+                        //fit: BoxFit.scaleDown,
+                          height: 100,
+                          image: AssetImage('assets/logo.png')
                       ),
                       Container(
                           height: 30
@@ -305,13 +295,18 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
-                    height: 30
-                ),
-                Text(
-                    "Which one is Different?",
-                    style: TextStyle(
-                        fontSize: 25,
-                        fontFamily: _fontFamily
+                    width: double.infinity,
+                    color: Colors.black87,
+                    height: 40,
+                    child: Center(
+                      child: Text(
+                          "Which one is Unique?",
+                          style: TextStyle(
+                              fontSize: 30,
+                              fontFamily: _fontFamily,
+                              color: Colors.white
+                          )
+                      ),
                     )
                 ),
                 Expanded(
@@ -320,117 +315,132 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                         child: Container()
                     )
                 ),
-                Text(
-                    "Select your answer Below!",
-                    style: TextStyle(
-                        fontSize: 25,
-                        fontFamily: _fontFamily
+                Container(
+                    width: double.infinity,
+                    color: Colors.black87,
+                    height: 40,
+                    child: Center(
+                      child: Text(
+                          "Answers",
+                          style: TextStyle(
+                              fontSize: 30,
+                              fontFamily: _fontFamily,
+                              color: Colors.white
+                          )
+                      ),
                     )
                 ),
-                ButtonBar(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      ElevatedButton(
-                          onPressed: () {
-                            if(_correctAnswer == 1){
-                              setState((){
-                                _currentLevel = _currentLevel + 1;
-                              });
-                              _changeLevel = true;
-                            }
-                          },
-                          child: Text(
-                              "1",
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  fontFamily: _fontFamily
-                              )
-                          ),
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                          )
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            if(_correctAnswer == 2){
-                              setState((){
-                                _currentLevel = _currentLevel + 1;
-                              });
-                              _changeLevel = true;
-                            }
-                          },
-                          child: Text(
-                              "2",
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  fontFamily: _fontFamily
-                              )
-                          ),
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                          )
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            if(_correctAnswer == 3){
-                              setState((){
-                                _currentLevel = _currentLevel + 1;
-                              });
-                              _changeLevel = true;
-                            }
-                          },
-                          child: Text(
-                              "3",
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  fontFamily: _fontFamily
-                              )
-                          ),
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                          )
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            if(_correctAnswer == 4){
-                              setState((){
-                                _currentLevel = _currentLevel + 1;
-                              });
-                              _changeLevel = true;
-                            }
-                          },
-                          child: Text(
-                              "4",
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  fontFamily: _fontFamily
-                              )
-                          ),
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                          )
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            if(_correctAnswer == 5){
-                              setState((){
-                                _currentLevel = _currentLevel + 1;
-                              });
-                              _changeLevel = true;
-                            }
-                          },
-                          child: Text(
-                              "5",
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  fontFamily: _fontFamily
-                              )
-                          ),
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
-                          )
-                      ),
-                    ]
+                Container(
+                    color: Colors.black87,
+                    width: double.infinity,
+                    height: 50,
+                    child: Center(
+                        child: ButtonBar(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              ElevatedButton(
+                                  onPressed: () {
+                                    if(_correctAnswer == 1){
+                                      setState((){
+                                        _currentLevel = _currentLevel + 1;
+                                      });
+                                      _changeLevel = true;
+                                    }
+                                  },
+                                  child: Text(
+                                      "1",
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontFamily: _fontFamily
+                                      )
+                                  ),
+                                  style: ButtonStyle(
+                                      backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                                  )
+                              ),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    if(_correctAnswer == 2){
+                                      setState((){
+                                        _currentLevel = _currentLevel + 1;
+                                      });
+                                      _changeLevel = true;
+                                    }
+                                  },
+                                  child: Text(
+                                      "2",
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontFamily: _fontFamily
+                                      )
+                                  ),
+                                  style: ButtonStyle(
+                                      backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                                  )
+                              ),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    if(_correctAnswer == 3){
+                                      setState((){
+                                        _currentLevel = _currentLevel + 1;
+                                      });
+                                      _changeLevel = true;
+                                    }
+                                  },
+                                  child: Text(
+                                      "3",
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontFamily: _fontFamily
+                                      )
+                                  ),
+                                  style: ButtonStyle(
+                                      backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                                  )
+                              ),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    if(_correctAnswer == 4){
+                                      setState((){
+                                        _currentLevel = _currentLevel + 1;
+                                      });
+                                      _changeLevel = true;
+                                    }
+                                  },
+                                  child: Text(
+                                      "4",
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontFamily: _fontFamily
+                                      )
+                                  ),
+                                  style: ButtonStyle(
+                                      backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                                  )
+                              ),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    if(_correctAnswer == 5){
+                                      setState((){
+                                        _currentLevel = _currentLevel + 1;
+                                      });
+                                      _changeLevel = true;
+                                    }
+                                  },
+                                  child: Text(
+                                      "5",
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontFamily: _fontFamily
+                                      )
+                                  ),
+                                  style: ButtonStyle(
+                                      backgroundColor: MaterialStateProperty.all<Color>(Color(0xff8fcaca))
+                                  )
+                              ),
+                            ]
+                        )
+                    )
                 )
               ],
             )

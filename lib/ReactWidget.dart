@@ -20,6 +20,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
   AnimationController _controller;
   final double _appBarOffSet = 50;
   final double _utilityBarOffset = 20;
+  final double _directionsOffset = 30;
   final double _bottomBarOffset = 45;
   final double _buttonWidth = 200;
   final int _msTimeLimit = 20000;
@@ -27,6 +28,10 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
   bool _gameOver;
   final String _fontFamily = "Satisfy";
   int _score;
+
+  //Canvas details fetched while debugging. Can probably improve this.
+  final double canvasWidth = 411;
+  final double canvasHeight = 569;
 
   @override
   void initState() {
@@ -64,16 +69,15 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
     _gameTimer.start();
   }
 
-  Rect createRandomPositionRect(double width, double height, int boxSize){
+  Rect createRandomPositionRect(int boxSize){
     Random rectPositionDecider = new Random();
 
-    double right = rectPositionDecider.nextInt(width.toInt()).toDouble();
+    double right = rectPositionDecider.nextInt(canvasWidth.toInt()).toDouble();
     if(right < boxSize) right = right + boxSize;
     double left = right - boxSize;
 
-    double bottom = rectPositionDecider.nextInt(height.toInt()).toDouble();
-    if(bottom < (boxSize + _appBarOffSet + _utilityBarOffset + _bottomBarOffset)) bottom = bottom + boxSize;
-    else if(bottom > (height - _bottomBarOffset)) bottom = bottom - _bottomBarOffset;
+    double bottom = rectPositionDecider.nextInt(canvasHeight.toInt()).toDouble();
+    if(bottom < (boxSize)) bottom = bottom + boxSize;
     double top = bottom - boxSize;
 
     return Rect.fromLTRB(left,top,right,bottom);
@@ -147,7 +151,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                          '!! Results !!',
+                          'Results',
                           style: TextStyle(
                               fontSize: 35,
                               color: Colors.white,
@@ -162,8 +166,10 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                               fontFamily: _fontFamily
                           )
                       ),
-                      Container(
-                          height: 30
+                      Image(
+                        //fit: BoxFit.scaleDown,
+                          height: 100,
+                          image: AssetImage('assets/logo.png')
                       ),
                       Container(
                         width: this._buttonWidth,
@@ -211,7 +217,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
     else{
       if(_updateRect){
         int rectSize = updateDifficulty(this._score);
-        _rect = createRandomPositionRect(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height, rectSize);
+        _rect = createRandomPositionRect(rectSize);
         _rectColor = getNewRectColor();
 
         _updateRect = false;
@@ -255,13 +261,29 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  Container(
+                      width: double.infinity,
+                      color: Colors.black87,
+                      height: 40,
+                      child: Center(
+                        child: Text(
+                            "Keep clicking the Shape!",
+                            style: TextStyle(
+                                fontSize: _directionsOffset,
+                                fontFamily: _fontFamily,
+                                color: Colors.white
+                            )
+                        ),
+                      )
+                  ),
                   Expanded(
                       child: GestureDetector(
                           onTapDown: (details) {
                             RenderBox box = context.findRenderObject();
                             final offset = box.globalToLocal(details.globalPosition);
 
-                            Offset normalizedOffset = offset - Offset(0, this._appBarOffSet + this._utilityBarOffset);
+                            int manualOffset = 15;
+                            Offset normalizedOffset = offset - Offset(0, this._appBarOffSet + this._utilityBarOffset + this._directionsOffset + manualOffset);
 
                             final bool clickedOn = _rect.contains(normalizedOffset);
                             if (clickedOn) {

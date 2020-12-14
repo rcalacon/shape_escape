@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'AppearWidget.dart';
 import 'ReactWidget.dart';
+import 'CountWidget.dart' as ShapeEscape;
 import 'UniqueWidget.dart' as ShapeEscape;
 
 void main() {
@@ -54,12 +55,17 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                  '!! Play Something !!',
+                  'Shape Escape',
                   style: TextStyle(
                     fontSize: 35,
                     color: Colors.white,
                     fontFamily: _fontFamily
                   )
+              ),
+              Image(
+                //fit: BoxFit.scaleDown,
+                height: 100,
+                image: AssetImage('assets/logo.png')
               ),
               Container(
                 height: 30
@@ -104,7 +110,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: this._buttonWidth,
                 child: ElevatedButton.icon(
                     onPressed: () {
-                      /*...*/
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ShapeEscape.CountWidget())
+                      );
                     },
                     icon: Icon(Icons.apps_rounded),
                     label: Text(
