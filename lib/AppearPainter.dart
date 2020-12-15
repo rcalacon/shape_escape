@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class ReactPainter extends CustomPainter {
+class AppearPainter extends CustomPainter {
   final double opacity;
   final Rect rect;
-  ReactPainter(this.rect, this.opacity);
+  AppearPainter(this.rect, this.opacity);
 
   @override
   void paint(Canvas canvas, Size size) {

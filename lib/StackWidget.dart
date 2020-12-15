@@ -1,29 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
-import 'dart:async';
-import 'ReactPainter.dart';
+import 'StackPainter.dart';
+
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ReactWidget extends StatefulWidget {
-  ReactWidget({Key key, this.title}) : super(key: key);
+class StackWidget extends StatefulWidget {
+  StackWidget({Key key, this.title}) : super(key: key);
   final String title;
 
   @override
-  _ReactWidgetState createState() => _ReactWidgetState();
+  _StackWidgetState createState() => _StackWidgetState();
 }
 
-class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin {
+class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin {
   Future<FirebaseApp> _initialization;
-  final String highScoreCollection = "react";
-
+  final String highScoreCollection = "stack";
   Rect _rect;
-  int _rectColor;
-  int _prevRectColor;
-  bool _updateRect;
+  double _rectWidth;
   Animation<double> _animation;
   AnimationController _controller;
   final double _appBarOffSet = 50;
@@ -31,26 +28,29 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
   final double _directionsOffset = 30;
   final double _bottomBarOffset = 45;
   final double _buttonWidth = 200;
-  final int _msTimeLimit = 20000;
+  bool _changeLevel;
+  int _currentLevel;
   Stopwatch _gameTimer;
-  bool _gameOver;
-  final String _fontFamily = "Satisfy";
-  FToast tapResultToast;
-  int _score;
   int numMisses;
-  final int penalty = 1;
-  bool canSubmitInitials;
-  bool submittedInitials;
-
-  final _initialsSubmissionController = TextEditingController();
+  final int penalty = 5000;
+  Icon _currentLevelWidget;
+  final String _fontFamily = "Satisfy";
+  FToast stackResultToast;
 
   //Canvas details fetched while debugging. Can probably improve this.
   final double canvasWidth = 411;
   final double canvasHeight = 569;
 
+  bool canSubmitInitials;
+  bool submittedInitials;
+
+  final _initialsSubmissionController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+
+    _rectWidth = 100;
 
     //Since the game has to be played, this should be initialized by then
     if(_initialization == null){
@@ -58,40 +58,14 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
     }
 
     numMisses = 0;
-    _updateRect = true;
 
-    _controller = AnimationController(
-      vsync: this,
-      duration : Duration(seconds : _msTimeLimit ~/ 1000)
-    );
-
-    Tween<double> _opacityTween = Tween(begin: 0, end: 1);
-
-    _animation = _opacityTween.animate(_controller)
-      ..addListener(() {
-        setState(() {});
-      })
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _controller.stop();
-          _updateRect = false;
-          setState(() {
-            canSubmitInitials = false;
-            _gameOver = true;
-          });
-        }
-        else if (status == AnimationStatus.dismissed) {
-          _controller.forward();
-        }
-      });
-
-    _controller.forward();
-
+    _changeLevel = true;
+    _currentLevelWidget = Icon(Icons.looks_one);
     _gameTimer = new Stopwatch();
     _gameTimer.start();
 
-    tapResultToast = FToast();
-    tapResultToast.init(context);
+    stackResultToast = FToast();
+    stackResultToast.init(context);
 
     _initialsSubmissionController.text = "";
   }
@@ -110,30 +84,15 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
     return Rect.fromLTRB(left,top,right,bottom);
   }
 
-  int getNewRectColor(){
-    Random rectColorDecider = new Random();
-
-    int colorResult = rectColorDecider.nextInt(5);
-    if(_prevRectColor != null){
-      while(_prevRectColor == colorResult){
-        colorResult = rectColorDecider.nextInt(5);
-      }
-    }
-
-    _prevRectColor = colorResult;
-    return colorResult;
-  }
-
-  _ReactWidgetState() {
-    _score = 0;
-    _gameOver = false;
+  _StackWidgetState() {
+    _currentLevel = 1;
     canSubmitInitials = false;
     submittedInitials = false;
   }
 
-  void showTapResult(toastText){
-    tapResultToast.removeCustomToast();
-    tapResultToast.showToast(
+  void showStackResult(toastText){
+    stackResultToast.removeCustomToast();
+    stackResultToast.showToast(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
           decoration: BoxDecoration(
@@ -165,35 +124,79 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
     );
   }
 
-  int updateDifficulty(int score){
-    int targetSize = 100;
+  int startNextLevel(int currentLevel){
+    if(_controller != null) _controller.dispose();
 
-    if(score >= 5){
-      targetSize = 90;
-    }if(score >= 10){
-      targetSize = 80;
-    }if(score >= 15){
-      targetSize = 70;
-    }if(score >= 20){
-      targetSize = 60;
-    }if(score >= 25){
-      targetSize = 50;
+    double startOpacity = 0;
+    double endOpacity;
+    int animationDuration;
+    int boxSize = 100;
+
+    if(currentLevel == 1){
+      endOpacity = 1;
+      animationDuration = 5;
+    }else if(currentLevel == 2){
+      endOpacity = .4;
+      animationDuration = 10;
+      boxSize = 88;
+      _currentLevelWidget = Icon(Icons.looks_two);
+    }else if(currentLevel == 3){
+      endOpacity = .3;
+      animationDuration = 15;
+      boxSize = 76;
+      _currentLevelWidget = Icon(Icons.looks_3);
+    }else if(currentLevel == 4){
+      endOpacity = .2;
+      animationDuration = 20;
+      boxSize = 64;
+      _currentLevelWidget = Icon(Icons.looks_4);
+    }else if(currentLevel == 5){
+      endOpacity = .15;
+      animationDuration = 25;
+      boxSize = 50;
+      _currentLevelWidget = Icon(Icons.looks_5);
     }
 
-    return targetSize;
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: animationDuration),
+    );
+
+    Tween<double> _opacityTween = Tween(begin: (0 + (_rectWidth / 2)), end: canvasWidth - (_rectWidth/2));
+
+    _animation = _opacityTween.animate(_controller)
+      ..addListener(() {
+        setState(() {});
+      })
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _controller.forward();
+        }
+        else if (status == AnimationStatus.dismissed) {
+          _controller.forward();
+        }
+      });
+
+    _controller.forward();
+
+    return boxSize;
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if(_controller != null) _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
 
-    if(this._gameOver){
+    if(this._currentLevel > 5){
       _gameTimer.stop();
+      if(_controller != null){
+        _controller.dispose();
+        _controller = null;
+      }
 
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
@@ -202,7 +205,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
       return Scaffold(
           appBar: AppBar(
             title: Text(
-                'Appear',
+                'Stack',
                 style: TextStyle(
                     fontSize: 30,
                     color: Colors.white,
@@ -226,7 +229,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                           )
                       ),
                       Text(
-                          'Hits: $_score',
+                          'Time Elapsed: ${_gameTimer.elapsed.inMilliseconds / 1000}s',
                           style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -242,7 +245,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                           )
                       ),
                       Text(
-                          '-$penalty per miss',
+                          '${penalty / 1000} seconds per miss',
                           style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -250,27 +253,30 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                           )
                       ),
                       Text(
-                          'Score: ${_score - (numMisses * penalty)}',
+                          'Score: ${((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)/1000}s',
                           style: TextStyle(
-                              fontSize: 35,
+                              fontSize: 30,
                               color: Colors.white,
                               fontFamily: _fontFamily
                           )
                       ),
                       Container(
+                          height: 30
+                      ),
+                      Container(
                         width: this._buttonWidth,
                         child: ElevatedButton.icon(
                             onPressed: () {
-                              this._controller.reset();
-                              this._controller.forward();
+                              this._changeLevel = true;
+                              this._controller = null;
                               this._gameTimer.reset();
                               this._gameTimer.start();
-                              this._initialsSubmissionController.text = "";
                               this.numMisses = 0;
+                              _initialsSubmissionController.text = "";
                               setState((){
-                                _score = 0;
+                                canSubmitInitials = false;
                                 submittedInitials = false;
-                                _gameOver = false;
+                                _currentLevel = 1;
                               });
                             },
                             icon: Icon(Icons.emoji_emotions_outlined),
@@ -310,10 +316,10 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                         width: this._buttonWidth,
                         child: ElevatedButton.icon(
                             onPressed: !this.canSubmitInitials ? null : () {
-                              CollectionReference reactCollection = FirebaseFirestore.instance.collection(highScoreCollection);
-                              reactCollection.add({
+                              CollectionReference appearCollection = FirebaseFirestore.instance.collection(highScoreCollection);
+                              appearCollection.add({
                                 'initials': _initialsSubmissionController.text,
-                                'score': _score - numMisses
+                                'score': ((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)
                               })
                                   .then((value) => setState((){submittedInitials = true;}))
                                   .catchError((error) => print("Failed to add document: $error"));
@@ -388,46 +394,39 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
           )
       );
     }
-    else{
-      if(_updateRect){
-        int rectSize = updateDifficulty(this._score);
+    else {
+      if(this._changeLevel == true){
+        int rectSize = startNextLevel(this._currentLevel);
         _rect = createRandomPositionRect(rectSize);
-        _rectColor = getNewRectColor();
-
-        _updateRect = false;
+        this._changeLevel = false;
       }
 
       return Scaffold(
         appBar: AppBar(
-          leading: Text(
-              "  ${_score.toString()}",
-              style: TextStyle(
-                fontFamily: _fontFamily,
-                fontSize: 35,
-              )
-          ),
+          leading: _currentLevelWidget,
           title: Text(
-              'React',
+              'Stack',
               style: TextStyle(
-                fontFamily: _fontFamily,
-                fontSize: 30,
+                  color: Colors.white,
+                  fontFamily: _fontFamily,
+                  fontSize: 30
               )
           ),
           actions: <Widget>[
             Text(
-                " ${((_msTimeLimit - _gameTimer.elapsed.inMilliseconds) / 1000).toStringAsFixed(1)}",
+                " ${(_gameTimer.elapsed.inMilliseconds / 1000).toStringAsFixed(1)}",
                 style: TextStyle(
-                  fontFamily: _fontFamily,
-                  fontSize: 30,
+                    fontSize: 25,
+                    fontFamily: _fontFamily
                 )
             ),
             Text(
-                "  Seconds Left! ",
+                " Seconds",
                 style: TextStyle(
-                  fontFamily: _fontFamily,
-                  fontSize: 25,
+                    fontSize: 25,
+                    fontFamily: _fontFamily
                 )
-            )
+            ),
           ],
           toolbarHeight: this._appBarOffSet,
         ),
@@ -441,7 +440,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                       height: 40,
                       child: Center(
                         child: Text(
-                            "Keep clicking the Shape!",
+                            "Click the Shape!",
                             style: TextStyle(
                                 fontSize: _directionsOffset,
                                 fontFamily: _fontFamily,
@@ -451,33 +450,35 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                       )
                   ),
                   Expanded(
-                      child: Container(
-                        color: Color(0xffececec),
-                        child: GestureDetector(
-                            onTapDown: (details) {
-                              RenderBox box = context.findRenderObject();
-                              final offset = box.globalToLocal(details.globalPosition);
+                      child: GestureDetector(
+                          onTapDown: (details) {
+                            RenderBox box = context.findRenderObject();
+                            final offset = box.globalToLocal(details.globalPosition);
 
-                              int manualOffset = 15;
-                              Offset normalizedOffset = offset - Offset(0, this._appBarOffSet + this._utilityBarOffset + this._directionsOffset + manualOffset);
+                            int manualOffset = 15;
+                            Offset normalizedOffset = offset - Offset(0, this._appBarOffSet + this._utilityBarOffset + this._directionsOffset + manualOffset);
 
-                              final bool clickedOn = _rect.contains(normalizedOffset);
-                              if (clickedOn) {
-                                showTapResult("! Nice !");
-                                setState((){
-                                  this._score = this._score + 1;
-                                });
-                                _updateRect = true;
-                              } else {
-                                showTapResult("Missed!");
-                                numMisses ++;
+                            final bool clickedOn = _rect.contains(normalizedOffset);
+                            if (clickedOn) {
+                              showStackResult("! Nice !");
+                              this._changeLevel = true;
+                              setState((){
+                                this._currentLevel = this._currentLevel + 1;
+                              });
+                            } else {
+                              numMisses++;
+                              showStackResult("Missed!");
+                            }
+                          },
+                          child: AnimatedBuilder(
+                              animation: _animation,
+                              builder: (context, snapshot) {
+                                return CustomPaint(
+                                    painter: StackPainter(_rect, _animation.value),
+                                    child: Container()
+                                );
                               }
-                            },
-                            child: CustomPaint(
-                                painter: ReactPainter(_rect, _rectColor),
-                                child: Container()
-                            )
-                        )
+                          )
                       )
                   ),
                 ]

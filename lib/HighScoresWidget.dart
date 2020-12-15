@@ -1,7 +1,3 @@
-//TODO : track misses per game. add seconds to total (depends on game)
-//finish match game if possible
-//prevent landscape mode
-
 import 'package:flutter/material.dart';
 
 // Import the firebase_core plugin
@@ -12,13 +8,13 @@ const String appearCollectionName = "appear";
 const String reactCollectionName = "react";
 const String countCollectionName = "count";
 const String uniqueCollectionName = "unique";
-const String matchCollectionName = "match";
+const String stackCollectionName = "stack";
 
 const APPEAR_COLOR = Color(0xffe0bbe4);
 const REACT_COLOR = Color(0xff957dad);
 const COUNT_COLOR = Color(0xffd291bc);
 const UNIQUE_COLOR = Color(0xfffec8d8);
-const MATCH_COLOR = Color(0xffffccb6);
+const STACK_COLOR = Color(0xffffccb6);
 
 class HighScoresWidget extends StatefulWidget {
   HighScoresWidget({Key key, this.title}) : super(key: key);
@@ -88,15 +84,15 @@ class _HighScoresWidgetState extends State<HighScoresWidget> {
         gameColor = UNIQUE_COLOR;
         break;
       }
-      case matchCollectionName: {
-        gameColor = MATCH_COLOR;
+      case stackCollectionName: {
+        gameColor = STACK_COLOR;
         break;
       }
     }
 
     FirebaseFirestore.instance
         .collection(collection)
-        .orderBy('score', descending: false)
+        .orderBy('score', descending: shouldDescend)
         .limit(10)
         .get()
         .then((QuerySnapshot querySnapshot){
@@ -283,14 +279,14 @@ class _HighScoresWidgetState extends State<HighScoresWidget> {
                                         MaterialStateProperty.all<Color>(
                                             UNIQUE_COLOR))),
                             ElevatedButton(
-                                onPressed: _currentScoreList == "match" ? null : () {getScores("match");},
-                                child: Text("MATCH",
+                                onPressed: _currentScoreList == "stack" ? null : () {getScores("stack");},
+                                child: Text("STACK",
                                     style: TextStyle(
                                         fontSize: 10, fontFamily: _fontFamily)),
                                 style: ButtonStyle(
                                     backgroundColor:
                                         MaterialStateProperty.all<Color>(
-                                            MATCH_COLOR))),
+                                            STACK_COLOR))),
                           ])))
                 ],
               )),

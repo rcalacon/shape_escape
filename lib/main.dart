@@ -6,7 +6,7 @@ import 'ReactWidget.dart';
 import 'CountWidget.dart' as ShapeEscape;
 import 'UniqueWidget.dart' as ShapeEscape;
 import 'HighScoresWidget.dart';
-import 'MatchWidget.dart';
+import 'StackWidget.dart';
 
 void main() {
   runApp(MyApp());
@@ -165,18 +165,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => MatchWidget())
+                          MaterialPageRoute(builder: (context) => StackWidget())
                       );
                     },
                     icon: Icon(
-                        Icons.construction,
-                        color: Colors.grey
+                        Icons.view_headline,
                     ),
                     label: Text(
-                      "MATCH",
-                      style: TextStyle(
-                        color: Colors.grey
-                      )
+                      "STACK",
                     ),
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(Color(0xffffccb6))

@@ -35,7 +35,7 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
   final int penalty = 5000;
   Icon _currentLevelWidget;
   final String _fontFamily = "Satisfy";
-  FToast answerResultToast;
+  FToast tapResultToast;
 
   //Canvas details fetched while debugging. Can probably improve this.
   final double canvasWidth = 411;
@@ -62,8 +62,8 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
     _gameTimer = new Stopwatch();
     _gameTimer.start();
 
-    answerResultToast = FToast();
-    answerResultToast.init(context);
+    tapResultToast = FToast();
+    tapResultToast.init(context);
 
     _initialsSubmissionController.text = "";
   }
@@ -88,9 +88,9 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
     submittedInitials = false;
   }
 
-  void showAnswerResult(toastText){
-    answerResultToast.removeCustomToast();
-    answerResultToast.showToast(
+  void showTapResult(toastText){
+    tapResultToast.removeCustomToast();
+    tapResultToast.showToast(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
           decoration: BoxDecoration(
@@ -458,21 +458,21 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
 
                             final bool clickedOn = _rect.contains(normalizedOffset);
                             if (clickedOn) {
-                              showAnswerResult("! Nice !");
+                              showTapResult("! Nice !");
                               this._changeLevel = true;
                               setState((){
                                 this._currentLevel = this._currentLevel + 1;
                               });
                             } else {
                               numMisses++;
-                              showAnswerResult("Missed!");
+                              showTapResult("Missed!");
                             }
                           },
                           child: AnimatedBuilder(
                               animation: _animation,
                               builder: (context, snapshot) {
                                 return CustomPaint(
-                                    painter: ReactPainter(_rect, _animation.value),
+                                    painter: AppearPainter(_rect, _animation.value),
                                     child: Container()
                                 );
                               }
