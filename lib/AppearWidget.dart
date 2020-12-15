@@ -31,6 +31,8 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
   bool _changeLevel;
   int _currentLevel;
   Stopwatch _gameTimer;
+  int numMisses;
+  final int penalty = 5000;
   Icon _currentLevelWidget;
   final String _fontFamily = "Satisfy";
   FToast answerResultToast;
@@ -52,6 +54,8 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
     if(_initialization == null){
       _initialization = Firebase.initializeApp();
     }
+
+    numMisses = 0;
 
     _changeLevel = true;
     _currentLevelWidget = Icon(Icons.looks_one);
@@ -221,15 +225,34 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
                 Text(
                     'Time Elapsed: ${_gameTimer.elapsed.inMilliseconds / 1000}s',
                     style: TextStyle(
-                        fontSize: 25,
+                        fontSize: 20,
                         color: Colors.white,
                         fontFamily: _fontFamily
                     )
                 ),
-                Image(
-                  //fit: BoxFit.scaleDown,
-                    height: 100,
-                    image: AssetImage('assets/logo.png')
+                Text(
+                    'Total Misses: $numMisses',
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontFamily: _fontFamily
+                    )
+                ),
+                Text(
+                    '${penalty / 1000} seconds per miss',
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontFamily: _fontFamily
+                    )
+                ),
+                Text(
+                    'Score: ${((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)/1000}s',
+                    style: TextStyle(
+                        fontSize: 30,
+                        color: Colors.white,
+                        fontFamily: _fontFamily
+                    )
                 ),
                 Container(
                     height: 30
@@ -242,6 +265,7 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
                         this._controller = null;
                         this._gameTimer.reset();
                         this._gameTimer.start();
+                        this.numMisses = 0;
                         _initialsSubmissionController.text = "";
                         setState((){
                           canSubmitInitials = false;
@@ -289,7 +313,7 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
                         CollectionReference appearCollection = FirebaseFirestore.instance.collection(highScoreCollection);
                         appearCollection.add({
                           'initials': _initialsSubmissionController.text,
-                          'score': _gameTimer.elapsed.inMilliseconds
+                          'score': ((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)
                         })
                             .then((value) => setState((){submittedInitials = true;}))
                             .catchError((error) => print("Failed to add document: $error"));
@@ -436,6 +460,7 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
                                 this._currentLevel = this._currentLevel + 1;
                               });
                             } else {
+                              numMisses++;
                               showAnswerResult("Missed!");
                             }
                           },

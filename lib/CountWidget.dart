@@ -35,6 +35,8 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
   final int _msTimeLimit = 300000; //5 minutes total
   double _shapeRadius = 20;
   Stopwatch _gameTimer;
+  int numMisses;
+  final int penalty = 10000;
   int _currentLevel;
   final String _fontFamily = "Satisfy";
 
@@ -63,6 +65,8 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
     if(_initialization == null){
       _initialization = Firebase.initializeApp();
     }
+
+    numMisses = 0;
 
     _shapePositions = new List();
     _colorPositions = new List();
@@ -353,10 +357,29 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                               fontFamily: _fontFamily
                           )
                       ),
-                      Image(
-                        //fit: BoxFit.scaleDown,
-                          height: 100,
-                          image: AssetImage('assets/logo.png')
+                      Text(
+                          'Total Misses: $numMisses',
+                          style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
+                      ),
+                      Text(
+                          '${penalty / 1000} seconds per miss',
+                          style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
+                      ),
+                      Text(
+                          'Score: ${((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)/1000}s',
+                          style: TextStyle(
+                              fontSize: 30,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
                       ),
                       Container(
                           height: 30
@@ -370,6 +393,7 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                               this._gameTimer.start();
                               this._controller.reset();
                               this._controller.forward();
+                              this.numMisses = 0;
                               _initialsSubmissionController.text = "";
                               setState((){
                                 canSubmitInitials = false;
@@ -417,7 +441,7 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                               CollectionReference countCollection = FirebaseFirestore.instance.collection(highScoreCollection);
                               countCollection.add({
                                 'initials': _initialsSubmissionController.text,
-                                'score': _gameTimer.elapsed.inMilliseconds
+                                'score': ((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)
                               })
                                   .then((value) => setState((){submittedInitials = true;}))
                                   .catchError((error) => print("Failed to add document: $error"));
@@ -603,6 +627,7 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                     _changeLevel = true;
                                     showAnswerResult("Correct!");
                                   }else {
+                                    numMisses++;
                                     showAnswerResult("Wrong!");
                                   }
                                 },
@@ -626,6 +651,7 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                     _changeLevel = true;
                                     showAnswerResult("Correct!");
                                   }else {
+                                    numMisses++;
                                     showAnswerResult("Wrong!");
                                   }
                                 },
@@ -649,6 +675,7 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                     _changeLevel = true;
                                     showAnswerResult("Correct!");
                                   }else {
+                                    numMisses++;
                                     showAnswerResult("Wrong!");
                                   }
                                 },
@@ -672,6 +699,7 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                     _changeLevel = true;
                                     showAnswerResult("Correct!");
                                   }else {
+                                    numMisses++;
                                     showAnswerResult("Wrong!");
                                   }
                                 },
@@ -695,6 +723,7 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
                                     _changeLevel = true;
                                     showAnswerResult("Correct!");
                                   }else {
+                                    numMisses++;
                                     showAnswerResult("Wrong!");
                                   }
                                 },

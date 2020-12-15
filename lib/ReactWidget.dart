@@ -37,6 +37,8 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
   final String _fontFamily = "Satisfy";
   FToast answerResultToast;
   int _score;
+  int numMisses;
+  final int penalty = 1;
   bool canSubmitInitials;
   bool submittedInitials;
 
@@ -55,6 +57,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
       _initialization = Firebase.initializeApp();
     }
 
+    numMisses = 0;
     _updateRect = true;
 
     _controller = AnimationController(
@@ -219,17 +222,36 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                           )
                       ),
                       Text(
-                          'Score: $_score',
+                          'Hits: $_score',
                           style: TextStyle(
-                              fontSize: 25,
+                              fontSize: 20,
                               color: Colors.white,
                               fontFamily: _fontFamily
                           )
                       ),
-                      Image(
-                        //fit: BoxFit.scaleDown,
-                          height: 100,
-                          image: AssetImage('assets/logo.png')
+                      Text(
+                          'Total Misses: $numMisses',
+                          style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
+                      ),
+                      Text(
+                          '-$penalty per miss',
+                          style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
+                      ),
+                      Text(
+                          'Score: ${_score - (numMisses * penalty)}',
+                          style: TextStyle(
+                              fontSize: 35,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
                       ),
                       Container(
                         width: this._buttonWidth,
@@ -240,6 +262,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                               this._gameTimer.reset();
                               this._gameTimer.start();
                               this._initialsSubmissionController.text = "";
+                              this.numMisses = 0;
                               setState((){
                                 _score = 0;
                                 submittedInitials = false;
@@ -286,7 +309,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                               CollectionReference reactCollection = FirebaseFirestore.instance.collection(highScoreCollection);
                               reactCollection.add({
                                 'initials': _initialsSubmissionController.text,
-                                'score': _score
+                                'score': _score - numMisses
                               })
                                   .then((value) => setState((){submittedInitials = true;}))
                                   .catchError((error) => print("Failed to add document: $error"));
@@ -441,6 +464,7 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                               _updateRect = true;
                             } else {
                               showAnswerResult("Missed!");
+                              numMisses ++;
                             }
                           },
                           child: CustomPaint(

@@ -35,6 +35,8 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
   final double _buttonWidth = 200;
   final int _msTimeLimit = 300000; //5 minutes total
   Stopwatch _gameTimer;
+  int numMisses;
+  final int penalty = 5000;
   int _currentLevel;
   int _currentShapeCombo;
   int _currentColorCombo;
@@ -55,6 +57,8 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
     if(_initialization == null){
       _initialization = Firebase.initializeApp();
     }
+
+    numMisses = 0;
 
     _shapePositions = new List();
     _labelPositions = new List();
@@ -242,7 +246,7 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                       Text(
                           'Results',
                           style: TextStyle(
-                              fontSize: 30,
+                              fontSize: 35,
                               color: Colors.white,
                               fontFamily: _fontFamily
                           )
@@ -250,15 +254,34 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                       Text(
                           'Time Elapsed: ${_gameTimer.elapsed.inMilliseconds / 1000}s',
                           style: TextStyle(
-                              fontSize: 25,
+                              fontSize: 20,
                               color: Colors.white,
                               fontFamily: _fontFamily
                           )
                       ),
-                      Image(
-                        //fit: BoxFit.scaleDown,
-                          height: 100,
-                          image: AssetImage('assets/logo.png')
+                      Text(
+                          'Total Misses: $numMisses',
+                          style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
+                      ),
+                      Text(
+                          '${penalty / 1000} seconds per miss',
+                          style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
+                      ),
+                      Text(
+                          'Score: ${((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)/1000}s',
+                          style: TextStyle(
+                              fontSize: 30,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
                       ),
                       Container(
                           height: 30
@@ -272,6 +295,7 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                               this._gameTimer.start();
                               this._controller.reset();
                               this._controller.forward();
+                              this.numMisses = 0;
                               this._initialsSubmissionController.text = "";
                               setState((){
                                 canSubmitInitials = false;
@@ -319,7 +343,7 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                               CollectionReference uniqueCollection = FirebaseFirestore.instance.collection(highScoreCollection);
                               uniqueCollection.add({
                                 'initials': _initialsSubmissionController.text,
-                                'score': _gameTimer.elapsed.inMilliseconds
+                                'score': ((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)
                               })
                               .then((value) => setState((){submittedInitials = true;}))
                               .catchError((error) => print("Failed to add document: $error"));
@@ -492,7 +516,10 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                       _changeLevel = true;
                                       showAnswerResult("Correct!");
                                     }
-                                    else showAnswerResult("Wrong!");
+                                    else {
+                                      numMisses++;
+                                      showAnswerResult("Wrong!");
+                                    }
                                   },
                                   child: Text(
                                       "1",
@@ -514,7 +541,10 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                       _changeLevel = true;
                                       showAnswerResult("Correct!");
                                     }
-                                    else showAnswerResult("Wrong!");
+                                    else {
+                                      numMisses++;
+                                      showAnswerResult("Wrong!");
+                                    }
                                   },
                                   child: Text(
                                       "2",
@@ -536,7 +566,10 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                       _changeLevel = true;
                                       showAnswerResult("Correct!");
                                     }
-                                    else showAnswerResult("Wrong!");
+                                    else {
+                                      numMisses++;
+                                      showAnswerResult("Wrong!");
+                                    }
                                   },
                                   child: Text(
                                       "3",
@@ -558,7 +591,10 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                       _changeLevel = true;
                                       showAnswerResult("Correct!");
                                     }
-                                    else showAnswerResult("Wrong!");
+                                    else {
+                                      numMisses++;
+                                      showAnswerResult("Wrong!");
+                                    }
                                   },
                                   child: Text(
                                       "4",
@@ -580,7 +616,10 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                                       _changeLevel = true;
                                       showAnswerResult("Correct!");
                                     }
-                                    else showAnswerResult("Wrong!");
+                                    else {
+                                      numMisses++;
+                                      showAnswerResult("Wrong!");
+                                    }
                                   },
                                   child: Text(
                                       "5",
