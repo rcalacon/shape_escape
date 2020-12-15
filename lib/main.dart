@@ -6,6 +6,7 @@ import 'ReactWidget.dart';
 import 'CountWidget.dart' as ShapeEscape;
 import 'UniqueWidget.dart' as ShapeEscape;
 import 'HighScoresWidget.dart';
+import 'MatchWidget.dart';
 
 void main() {
   runApp(MyApp());
@@ -38,6 +39,16 @@ class _MyHomePageState extends State<MyHomePage> {
   double _buttonWidth = 120;
   double _highScoreButtonWidth = 200;
   final String _fontFamily = "Satisfy";
+  String test;
+  @override
+  void initState(){
+    super.initState();
+
+  }
+
+  _MyHomePageState() {
+    test = "test";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,10 +163,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: this._buttonWidth,
                 child: ElevatedButton.icon(
                     onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MatchWidget())
+                      );
                     },
-                    icon: Icon(Icons.cached),
+                    icon: Icon(
+                        Icons.construction,
+                        color: Colors.grey
+                    ),
                     label: Text(
                       "MATCH",
+                      style: TextStyle(
+                        color: Colors.grey
+                      )
                     ),
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(Color(0xffffccb6))

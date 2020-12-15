@@ -451,30 +451,33 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
                       )
                   ),
                   Expanded(
-                      child: GestureDetector(
-                          onTapDown: (details) {
-                            RenderBox box = context.findRenderObject();
-                            final offset = box.globalToLocal(details.globalPosition);
+                      child: Container(
+                        color: Color(0xffececec),
+                        child: GestureDetector(
+                            onTapDown: (details) {
+                              RenderBox box = context.findRenderObject();
+                              final offset = box.globalToLocal(details.globalPosition);
 
-                            int manualOffset = 15;
-                            Offset normalizedOffset = offset - Offset(0, this._appBarOffSet + this._utilityBarOffset + this._directionsOffset + manualOffset);
+                              int manualOffset = 15;
+                              Offset normalizedOffset = offset - Offset(0, this._appBarOffSet + this._utilityBarOffset + this._directionsOffset + manualOffset);
 
-                            final bool clickedOn = _rect.contains(normalizedOffset);
-                            if (clickedOn) {
-                              showAnswerResult("! Nice !");
-                              setState((){
-                                this._score = this._score + 1;
-                              });
-                              _updateRect = true;
-                            } else {
-                              showAnswerResult("Missed!");
-                              numMisses ++;
-                            }
-                          },
-                          child: CustomPaint(
-                              painter: ReactPainter(_rect, _rectColor),
-                              child: Container()
-                          )
+                              final bool clickedOn = _rect.contains(normalizedOffset);
+                              if (clickedOn) {
+                                showAnswerResult("! Nice !");
+                                setState((){
+                                  this._score = this._score + 1;
+                                });
+                                _updateRect = true;
+                              } else {
+                                showAnswerResult("Missed!");
+                                numMisses ++;
+                              }
+                            },
+                            child: CustomPaint(
+                                painter: ReactPainter(_rect, _rectColor),
+                                child: Container()
+                            )
+                        )
                       )
                   ),
                 ]

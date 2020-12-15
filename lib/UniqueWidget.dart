@@ -483,9 +483,12 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
                     )
                 ),
                 Expanded(
-                    child: CustomPaint(
-                        painter: UniquePainter(_shapePositions, _labelPositions, _currentLevel, _correctAnswer, _currentShapeCombo, _shapeColorOne, _shapeColorTwo, _currentColorCombo, _currentSizeCombo, _correctSize),
-                        child: Container()
+                    child: Container(
+                      color: Color(0xffececec),
+                      child: CustomPaint(
+                          painter: UniquePainter(_shapePositions, _labelPositions, _currentLevel, _correctAnswer, _currentShapeCombo, _shapeColorOne, _shapeColorTwo, _currentColorCombo, _currentSizeCombo, _correctSize),
+                          child: Container()
+                      )
                     )
                 ),
                 Container(
