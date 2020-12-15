@@ -323,6 +323,10 @@ class _CountWidgetState extends State<CountWidget> with TickerProviderStateMixin
     if(this._currentLevel > 5){
       _gameTimer.stop();
 
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
       return Scaffold(
           appBar: AppBar(
             title: Text(

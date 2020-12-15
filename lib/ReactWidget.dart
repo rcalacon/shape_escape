@@ -195,6 +195,10 @@ class _ReactWidgetState extends State<ReactWidget> with TickerProviderStateMixin
     if(this._gameOver){
       _gameTimer.stop();
 
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
       return Scaffold(
           appBar: AppBar(
             title: Text(

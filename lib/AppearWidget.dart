@@ -196,6 +196,10 @@ class _AppearWidgetState extends State<AppearWidget> with TickerProviderStateMix
         _controller = null;
       }
 
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
       return Scaffold(
         appBar: AppBar(
           title: Text(

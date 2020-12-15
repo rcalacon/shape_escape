@@ -225,6 +225,10 @@ class _UniqueWidgetState extends State<UniqueWidget> with TickerProviderStateMix
     if(this._currentLevel > 6){
       _gameTimer.stop();
 
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
       return Scaffold(
           appBar: AppBar(
             title: Text(
