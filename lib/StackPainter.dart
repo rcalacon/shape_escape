@@ -2,16 +2,30 @@ import 'package:flutter/material.dart';
 
 class StackPainter extends CustomPainter {
   final double xPosition;
-  final Rect rect;
-  StackPainter(this.rect, this.xPosition);
+  final double rectWidth;
+  final double rectBottom;
+  final Color rectColor;
+  final List stacks;
+  final List stackColors;
+  final double rectHeight;
+  StackPainter(this.rectWidth, this.xPosition, this.rectBottom, this.rectColor, this.stacks, this.stackColors, this.rectHeight);
 
   @override
   void paint(Canvas canvas, Size size) {
     var paint = Paint()
-      ..color = Color.fromRGBO(0,0,0, 1);
+      ..color = rectColor;
+
+    for(int stackIndex = 0; stackIndex < stacks.length; stackIndex++){
+      Rect currentStack = stacks[stackIndex];
+      canvas.drawRect(currentStack, Paint()..color = this.stackColors[stackIndex]);
+    }
 
     //canvas.drawRect(rect, paint);
-    canvas.drawRect(Rect.fromLTRB(xPosition - 50,200,(xPosition + 50),300), paint);
+    double left = xPosition - (rectWidth/2);
+    double right = xPosition + (rectWidth/2);
+    double bottom = rectBottom;
+    double top = rectBottom - rectHeight;
+    canvas.drawRect(Rect.fromLTRB(left, top, right, bottom), paint);
   }
 
   @override

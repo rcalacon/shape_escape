@@ -8,6 +8,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+const COLOR_OPTION_ONE = Color(0xffe0bbe4);
+const COLOR_OPTION_TWO = Color(0xff957dad);
+const COLOR_OPTION_THREE = Color(0xffd291bc);
+const COLOR_OPTION_FOUR = Color(0xfffec8d8);
+const COLOR_OPTION_FIVE = Color(0xffffccb6);
+
 class StackWidget extends StatefulWidget {
   StackWidget({Key key, this.title}) : super(key: key);
   final String title;
@@ -19,27 +25,33 @@ class StackWidget extends StatefulWidget {
 class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin {
   Future<FirebaseApp> _initialization;
   final String highScoreCollection = "stack";
-  Rect _rect;
-  double _rectWidth;
+
+  List _stacks;
+  List _stackColors;
+  Rect initialStack;
+  final double _beginningRectWidth = 150;
+  final double _rectHeight = 50;
+  final double _firstStackBottomPositionY = 519;
+  double _newStackBottomPositionY;
+  double _newRectWidth;
+  Color _newRectColor;
+  Rect _trimmedStack;
   Animation<double> _animation;
+  final int animationDuration = 1;
   AnimationController _controller;
   final double _appBarOffSet = 50;
-  final double _utilityBarOffset = 20;
   final double _directionsOffset = 30;
-  final double _bottomBarOffset = 45;
   final double _buttonWidth = 200;
+  final int _lastLevel = 8;
   bool _changeLevel;
   int _currentLevel;
-  Stopwatch _gameTimer;
-  int numMisses;
-  final int penalty = 5000;
-  Icon _currentLevelWidget;
+  bool gameOver;
   final String _fontFamily = "Satisfy";
   FToast stackResultToast;
 
   //Canvas details fetched while debugging. Can probably improve this.
   final double canvasWidth = 411;
-  final double canvasHeight = 569;
+  final double canvasHeight = 519;
 
   bool canSubmitInitials;
   bool submittedInitials;
@@ -50,19 +62,25 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
   void initState() {
     super.initState();
 
-    _rectWidth = 100;
-
     //Since the game has to be played, this should be initialized by then
     if(_initialization == null){
       _initialization = Firebase.initializeApp();
     }
 
-    numMisses = 0;
+    initialStack = new Rect.fromLTRB(130,469,280,519);
+
+    _stacks = new List();
+    _stacks.add(initialStack);
+
+    _stackColors = new List();
+    _stackColors.add(getRandomColor());
+
+    _newRectWidth = _beginningRectWidth;
+    _newStackBottomPositionY = _firstStackBottomPositionY;
+
+    _newRectColor = getRandomColor();
 
     _changeLevel = true;
-    _currentLevelWidget = Icon(Icons.looks_one);
-    _gameTimer = new Stopwatch();
-    _gameTimer.start();
 
     stackResultToast = FToast();
     stackResultToast.init(context);
@@ -70,24 +88,34 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
     _initialsSubmissionController.text = "";
   }
 
-  Rect createRandomPositionRect(int boxSize){
-    Random rectPositionDecider = new Random();
-
-    double right = rectPositionDecider.nextInt(canvasWidth.toInt()).toDouble();
-    if(right < boxSize) right = right + boxSize;
-    double left = right - boxSize;
-
-    double bottom = rectPositionDecider.nextInt(canvasHeight.toInt()).toDouble();
-    if(bottom < (boxSize)) bottom = bottom + boxSize;
-    double top = bottom - boxSize;
-
-    return Rect.fromLTRB(left,top,right,bottom);
-  }
-
   _StackWidgetState() {
     _currentLevel = 1;
     canSubmitInitials = false;
     submittedInitials = false;
+    gameOver = false;
+  }
+
+  Color getRandomColor(){
+    switch(new Random().nextInt(5)){
+      case 0: {
+        return COLOR_OPTION_ONE;
+      }
+      case 1: {
+        return COLOR_OPTION_TWO;
+      }
+      case 2: {
+        return COLOR_OPTION_THREE;
+      }
+      case 3: {
+        return COLOR_OPTION_FOUR;
+      }
+      case 4: {
+        return COLOR_OPTION_FIVE;
+      }
+      default: {
+        return COLOR_OPTION_ONE;
+      }
+    }
   }
 
   void showStackResult(toastText){
@@ -117,52 +145,68 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
         positionedToastBuilder: (context, child) {
           return Positioned(
               child: child,
-              bottom: 15,
-              left: 160
+              bottom: 50,
+              left: 165
           );
         }
     );
   }
 
-  int startNextLevel(int currentLevel){
+  Rect validateStack(){
+    double stackAttemptLeft = _animation.value - (_newRectWidth / 2);
+    double stackAttemptRight = _animation.value + (_newRectWidth / 2);
+
+    Rect lastStack;
+    if(_currentLevel == 1){
+      lastStack = initialStack;
+    }else{
+      lastStack = _stacks[_stacks.length - 1];
+    }
+
+    if(stackAttemptLeft < lastStack.left && stackAttemptRight < lastStack.left ||
+        stackAttemptLeft > lastStack.right && stackAttemptRight > lastStack.right){
+      return null;
+    }else{
+      if(stackAttemptLeft < lastStack.left) {
+        stackAttemptLeft = lastStack.left;
+      }
+      if(stackAttemptRight > lastStack.right) {
+        stackAttemptRight = lastStack.right;
+      }
+      _newRectWidth = stackAttemptRight - stackAttemptLeft;
+      return Rect.fromLTRB(stackAttemptLeft, _newStackBottomPositionY - _rectHeight, stackAttemptRight, _newStackBottomPositionY);
+    }
+  }
+
+  startNextLevel(int currentLevel){
     if(_controller != null) _controller.dispose();
 
-    double startOpacity = 0;
-    double endOpacity;
-    int animationDuration;
-    int boxSize = 100;
-
-    if(currentLevel == 1){
-      endOpacity = 1;
-      animationDuration = 5;
-    }else if(currentLevel == 2){
-      endOpacity = .4;
-      animationDuration = 10;
-      boxSize = 88;
-      _currentLevelWidget = Icon(Icons.looks_two);
-    }else if(currentLevel == 3){
-      endOpacity = .3;
-      animationDuration = 15;
-      boxSize = 76;
-      _currentLevelWidget = Icon(Icons.looks_3);
-    }else if(currentLevel == 4){
-      endOpacity = .2;
-      animationDuration = 20;
-      boxSize = 64;
-      _currentLevelWidget = Icon(Icons.looks_4);
-    }else if(currentLevel == 5){
-      endOpacity = .15;
-      animationDuration = 25;
-      boxSize = 50;
-      _currentLevelWidget = Icon(Icons.looks_5);
+    if(currentLevel != 1) {
+      _stacks.add(_trimmedStack);
+      _stackColors.add(_newRectColor);
+      _newRectColor = getRandomColor();
     }
+
+    _newStackBottomPositionY -= _rectHeight;
 
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: animationDuration),
     );
 
-    Tween<double> _opacityTween = Tween(begin: (0 + (_rectWidth / 2)), end: canvasWidth - (_rectWidth/2));
+    int initialDirectionDecider = new Random().nextInt(2);
+
+    double beginning;
+    double ending;
+    if(initialDirectionDecider == 0){
+      beginning = (0 + (_beginningRectWidth / 2));
+      ending = canvasWidth - (_beginningRectWidth/2);
+    }else {
+      beginning = canvasWidth - (_beginningRectWidth/2);
+      ending = (0 + (_beginningRectWidth / 2));
+    }
+
+    Tween<double> _opacityTween = Tween(begin: beginning, end: ending);
 
     _animation = _opacityTween.animate(_controller)
       ..addListener(() {
@@ -170,7 +214,7 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
       })
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
-          _controller.forward();
+          _controller.reverse();
         }
         else if (status == AnimationStatus.dismissed) {
           _controller.forward();
@@ -178,8 +222,6 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
       });
 
     _controller.forward();
-
-    return boxSize;
   }
 
   @override
@@ -191,8 +233,7 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
 
-    if(this._currentLevel > 5){
-      _gameTimer.stop();
+    if(this._currentLevel > _lastLevel || this.gameOver){
       if(_controller != null){
         _controller.dispose();
         _controller = null;
@@ -229,7 +270,7 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
                           )
                       ),
                       Text(
-                          'Time Elapsed: ${_gameTimer.elapsed.inMilliseconds / 1000}s',
+                          'Number of Stacks: $_currentLevel',
                           style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -237,7 +278,7 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
                           )
                       ),
                       Text(
-                          'Total Misses: $numMisses',
+                          '10 points per stack',
                           style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -245,7 +286,7 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
                           )
                       ),
                       Text(
-                          '${penalty / 1000} seconds per miss',
+                        'Length of last Stack: ${(_trimmedStack.right - _trimmedStack.left).toInt()}px',
                           style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -253,9 +294,17 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
                           )
                       ),
                       Text(
-                          'Score: ${((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)/1000}s',
+                        '1 bonus point per pixel',
                           style: TextStyle(
-                              fontSize: 30,
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: _fontFamily
+                          )
+                      ),
+                      Text(
+                          'Score: ${((_currentLevel * 10) + _trimmedStack.right - _trimmedStack.left).toInt()}',
+                          style: TextStyle(
+                              fontSize: 35,
                               color: Colors.white,
                               fontFamily: _fontFamily
                           )
@@ -269,14 +318,18 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
                             onPressed: () {
                               this._changeLevel = true;
                               this._controller = null;
-                              this._gameTimer.reset();
-                              this._gameTimer.start();
-                              this.numMisses = 0;
+                              this._stacks.clear();
+                              this._stacks.add(initialStack);
+                              this._stackColors.clear();
+                              this._stackColors.add(getRandomColor());
+                              this._newRectWidth = _beginningRectWidth;
+                              this._newStackBottomPositionY = _firstStackBottomPositionY;
                               _initialsSubmissionController.text = "";
                               setState((){
                                 canSubmitInitials = false;
                                 submittedInitials = false;
                                 _currentLevel = 1;
+                                gameOver = false;
                               });
                             },
                             icon: Icon(Icons.emoji_emotions_outlined),
@@ -319,7 +372,7 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
                               CollectionReference appearCollection = FirebaseFirestore.instance.collection(highScoreCollection);
                               appearCollection.add({
                                 'initials': _initialsSubmissionController.text,
-                                'score': ((numMisses * penalty) + _gameTimer.elapsed.inMilliseconds)
+                                'score': ((_currentLevel * 10) + (_trimmedStack.right - _trimmedStack.left)).toInt()
                               })
                                   .then((value) => setState((){submittedInitials = true;}))
                                   .catchError((error) => print("Failed to add document: $error"));
@@ -396,14 +449,19 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
     }
     else {
       if(this._changeLevel == true){
-        int rectSize = startNextLevel(this._currentLevel);
-        _rect = createRandomPositionRect(rectSize);
+        startNextLevel(this._currentLevel);
         this._changeLevel = false;
       }
 
       return Scaffold(
         appBar: AppBar(
-          leading: _currentLevelWidget,
+          leading: Text(
+              "  ${_currentLevel.toString()}",
+              style: TextStyle(
+                fontFamily: _fontFamily,
+                fontSize: 35,
+              )
+          ),
           title: Text(
               'Stack',
               style: TextStyle(
@@ -412,22 +470,6 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
                   fontSize: 30
               )
           ),
-          actions: <Widget>[
-            Text(
-                " ${(_gameTimer.elapsed.inMilliseconds / 1000).toStringAsFixed(1)}",
-                style: TextStyle(
-                    fontSize: 25,
-                    fontFamily: _fontFamily
-                )
-            ),
-            Text(
-                " Seconds",
-                style: TextStyle(
-                    fontSize: 25,
-                    fontFamily: _fontFamily
-                )
-            ),
-          ],
           toolbarHeight: this._appBarOffSet,
         ),
         body: SafeArea(
@@ -450,37 +492,52 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
                       )
                   ),
                   Expanded(
-                      child: GestureDetector(
-                          onTapDown: (details) {
-                            RenderBox box = context.findRenderObject();
-                            final offset = box.globalToLocal(details.globalPosition);
-
-                            int manualOffset = 15;
-                            Offset normalizedOffset = offset - Offset(0, this._appBarOffSet + this._utilityBarOffset + this._directionsOffset + manualOffset);
-
-                            final bool clickedOn = _rect.contains(normalizedOffset);
-                            if (clickedOn) {
-                              showStackResult("! Nice !");
-                              this._changeLevel = true;
-                              setState((){
-                                this._currentLevel = this._currentLevel + 1;
-                              });
-                            } else {
-                              numMisses++;
-                              showStackResult("Missed!");
-                            }
-                          },
-                          child: AnimatedBuilder(
-                              animation: _animation,
-                              builder: (context, snapshot) {
-                                return CustomPaint(
-                                    painter: StackPainter(_rect, _animation.value),
-                                    child: Container()
-                                );
-                              }
-                          )
+                      child: AnimatedBuilder(
+                          animation: _animation,
+                          builder: (context, snapshot) {
+                            return CustomPaint(
+                                painter: StackPainter(_newRectWidth, _animation.value, _newStackBottomPositionY, _newRectColor, _stacks, _stackColors, _rectHeight),
+                                child: Container()
+                            );
+                          }
                       )
                   ),
+                  Container(
+                      color: Colors.black87,
+                      width: double.infinity,
+                      height: 50,
+                      child: Center(
+                        child: ElevatedButton(
+                            onPressed: () {
+                              Rect validStack = validateStack();
+                              if(validStack != null) {
+                                showStackResult("! Nice !");
+                                this._changeLevel = true;
+                                this._trimmedStack = validStack;
+                                setState(() {
+                                  _currentLevel = _currentLevel + 1;
+                                });
+                              }else {
+                                showStackResult("! Miss !");
+                                this._changeLevel = false;
+                                setState(() {
+                                  this.gameOver = true;
+                                });
+                              }
+                            },
+                            child: Text(
+                                "stack!",
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    fontFamily: _fontFamily
+                                )
+                            ),
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Color(0xffffccb6))
+                            )
+                        ),
+                      )
+                  )
                 ]
             )
         ),

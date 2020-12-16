@@ -85,6 +85,7 @@ class _HighScoresWidgetState extends State<HighScoresWidget> {
         break;
       }
       case stackCollectionName: {
+        shouldDescend = true;
         gameColor = STACK_COLOR;
         break;
       }
@@ -173,52 +174,52 @@ class _HighScoresWidgetState extends State<HighScoresWidget> {
                         TableRow(children: [
                           Center(child: Text("1", style:entryStyle)),
                           Center(child: Text(_scores.length > 0 ? _scores[0][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 0 ? (_currentScoreList == "react" ? _scores[0][1].toString() : (_scores[0][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 0 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[0][1].toString() : (_scores[0][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                         TableRow(children: [
                           Center(child: Text("2", style:entryStyle)),
                           Center(child: Text(_scores.length > 1 ? _scores[1][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 1 ? (_currentScoreList == "react" ? _scores[1][1].toString() : (_scores[1][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 1 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[1][1].toString() : (_scores[1][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                         TableRow(children: [
                           Center(child: Text("3", style:entryStyle)),
                           Center(child: Text(_scores.length > 2 ? _scores[2][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 2 ? (_currentScoreList == "react" ? _scores[2][1].toString() : (_scores[2][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 2 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[2][1].toString() : (_scores[2][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                         TableRow(children: [
                           Center(child: Text("4", style:entryStyle)),
                           Center(child: Text(_scores.length > 3 ? _scores[3][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 3 ? (_currentScoreList == "react" ? _scores[3][1].toString() : (_scores[3][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 3 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[3][1].toString() : (_scores[3][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                         TableRow(children: [
                           Center(child: Text("5", style:entryStyle)),
                           Center(child: Text(_scores.length > 4 ? _scores[4][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 4 ? (_currentScoreList == "react" ? _scores[4][1].toString() : (_scores[4][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 4 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[4][1].toString() : (_scores[4][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                         TableRow(children: [
                           Center(child: Text("6", style:entryStyle)),
                           Center(child: Text(_scores.length > 5 ? _scores[5][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 5 ? (_currentScoreList == "react" ? _scores[5][1].toString() : (_scores[5][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 5 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[5][1].toString() : (_scores[5][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                         TableRow(children: [
                           Center(child: Text("7", style:entryStyle)),
                           Center(child: Text(_scores.length > 6 ? _scores[6][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 6 ? (_currentScoreList == "react" ? _scores[6][1].toString() : (_scores[6][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 6 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[6][1].toString() : (_scores[6][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                         TableRow(children: [
                           Center(child: Text("8", style:entryStyle)),
                           Center(child: Text(_scores.length > 7 ? _scores[7][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 7 ? (_currentScoreList == "react" ? _scores[7][1].toString() : (_scores[7][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 7 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[7][1].toString() : (_scores[7][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                         TableRow(children: [
                           Center(child: Text("9", style:entryStyle)),
                           Center(child: Text(_scores.length > 8 ? _scores[8][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 8 ? (_currentScoreList == "react" ? _scores[8][1].toString() : (_scores[8][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 8 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[8][1].toString() : (_scores[8][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                         TableRow(children: [
                           Center(child: Text("10", style:entryStyle)),
                           Center(child: Text(_scores.length > 9 ? _scores[9][0] : "", style:entryStyle)),
-                          Center(child: Text(_scores.length > 9 ? (_currentScoreList == "react" ? _scores[9][1].toString() : (_scores[9][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
+                          Center(child: Text(_scores.length > 9 ? (_currentScoreList == "react" || _currentScoreList == "stack" ? _scores[9][1].toString() : (_scores[9][1]/1000).toStringAsFixed(2) + "s") : "", style:entryStyle))
                         ]),
                       ]
                     )
