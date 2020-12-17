@@ -2,7 +2,9 @@
 
 
 ### Team of one 
-1. Rodney Alacon
+- Name: Rodney Alacon
+- RedID: 812138191
+
 
 #### Project Name: Shape Escape
 #### Description:
