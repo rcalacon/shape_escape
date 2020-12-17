@@ -482,7 +482,7 @@ class _StackWidgetState extends State<StackWidget> with TickerProviderStateMixin
                       height: 40,
                       child: Center(
                         child: Text(
-                            "Click the Shape!",
+                            "Stack em Up!",
                             style: TextStyle(
                                 fontSize: _directionsOffset,
                                 fontFamily: _fontFamily,
